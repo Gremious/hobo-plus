@@ -35,7 +35,7 @@ pub trait ToggleableExt: std::ops::Deref<Target = Toggleable> + hobo::AsElement 
 	}
 
 	fn toggle(&self) {
-		self.get_cmp::<ToggleState>().lock_mut().0.tap_mut(|x| { *x = !*x; });
+		self.get_cmp::<ToggleState>().lock_mut().0.pipe_ref_mut(|x| *x = !*x);
 	}
 
 	fn value_signal(self) -> impl hobo::signal::Signal<Item = bool> {
