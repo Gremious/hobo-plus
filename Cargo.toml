@@ -8,7 +8,7 @@ anyhow = "1"
 async-timer = "1.0.0-beta.8"
 clown = "1"
 futures = "0.3"
-hobo = { version = "0.4", features = ["property_macros"] }
+hobo = "0.4"
 js-sys = "0.3"
 log = "0.4"
 serde-wasm-bindgen = "0.5"
