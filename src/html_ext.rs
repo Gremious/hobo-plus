@@ -1,6 +1,7 @@
 use hobo::{prelude::*, create as e};
 use super::entity_ext::AsEntityExt;
 pub use tap::prelude::*;
+use hobo::signal::SignalExt;
 
 pub trait AExt: AsElement + Copy {
 	#[must_use] #[inline] fn untrusted<'a>(self) -> Self { self.set_untrusted(); self }
@@ -17,35 +18,35 @@ type ToggleState = hobo::signal::Mutable<Toggle>;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, AsElement)]
 pub struct Toggleable(hobo::Element);
 
-pub trait ToggleableExt: std::ops::Deref<Target = Toggleable> + hobo::AsElement + Copy + Sized + 'static {
+pub trait ToggleableExt: std::ops::Deref<Target = Toggleable> + Sized {
 	/// Takes in a closure of (self, current toggle state as fired by the mutable) and executes it.
-	fn set_on_toggle(self, mut f: impl FnMut(bool) + 'static) -> Self {
+	fn set_on_toggle(self, mut f: impl FnMut(bool) + 'static) -> Self where Self: 'static {
 		self.add_bundle(self.get_cmp::<ToggleState>().signal().subscribe(move |x| f(x.0)));
 		self
 	}
-	fn on_toggle(self, f: impl FnMut(bool) + 'static) -> Self { self.set_on_toggle(f); self }
-	fn with_on_toggle(self, mut f: impl FnMut(&Self, bool) + 'static) -> Self { self.on_toggle(move |e| f(&self, e)) }
+	fn on_toggle(self, f: impl FnMut(bool) + 'static) -> Self where Self: Copy + 'static { self.set_on_toggle(f); self }
+	fn with_on_toggle(self, mut f: impl FnMut(&Self, bool) + 'static) -> Self where Self: Copy + 'static { self.on_toggle(move |e| f(&self, e)) }
 
-	fn value(&self) -> bool {
+	fn value(self) -> bool {
 		self.get_cmp::<ToggleState>().lock_ref().0
 	}
 
-	fn set_value(&self, v: bool) {
+	fn set_value(self, v: bool) {
 		self.get_cmp::<ToggleState>().lock_mut().0 = v;
 	}
 
-	fn toggle(&self) {
+	fn toggle(self) {
 		self.get_cmp::<ToggleState>().lock_mut().0.pipe_ref_mut(|x| *x = !*x);
 	}
 
-	fn value_signal(self) -> impl hobo::signal::Signal<Item = bool> {
+	fn value_signal(self) -> impl hobo::signal::Signal<Item = bool> + 'static {
 		self.get_cmp::<ToggleState>().signal_ref(|x| x.0)
 	}
 
-	fn toggle_on_click(self) -> Self { self.on_click(move |_| self.toggle()) }
+	fn toggle_on_click(self) -> Self where Self: AsElement + Copy + 'static { self.on_click(move |_| self.toggle()) }
 }
 
-impl<D: std::ops::Deref<Target = Toggleable> + hobo::AsElement + Copy + Sized + 'static> ToggleableExt for D {}
+impl<D: std::ops::Deref<Target = Toggleable> + Sized> ToggleableExt for D {}
 
 // impl ToggleableExt<E: hobo::AsElement + Clone + Copy + std::fmt::Debug + PartialEq + Eq + std::hash::Hash + 'static, D: std::ops::Deref + hobo::AsElement + Copy + Sized + 'static> for D {
 // }
