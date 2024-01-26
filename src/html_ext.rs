@@ -20,10 +20,10 @@ pub struct Toggleable(hobo::Element);
 
 pub trait ToggleableExt: std::ops::Deref<Target = Toggleable> + Sized {
 	/// Takes in a closure of (self, current toggle state as fired by the mutable) and executes it.
-	fn set_on_toggle(self, mut f: impl FnMut(bool) + 'static) where Self: 'static {
+	fn set_on_toggle(self, mut f: impl FnMut(bool) + 'static) {
 		self.add_bundle(self.get_cmp::<ToggleState>().signal().subscribe(move |x| f(x.0)));
 	}
-	fn on_toggle(self, f: impl FnMut(bool) + 'static) -> Self where Self: Copy + 'static { self.set_on_toggle(f); self }
+	fn on_toggle(self, f: impl FnMut(bool) + 'static) -> Self where Self: Copy { self.set_on_toggle(f); self }
 	fn with_on_toggle(self, mut f: impl FnMut(&Self, bool) + 'static) -> Self where Self: Copy + 'static { self.on_toggle(move |e| f(&self, e)) }
 
 	fn value(self) -> bool {
@@ -58,5 +58,10 @@ impl Toggleable {
 	pub fn new(element: impl hobo::AsElement, default: bool) -> Self {
 		Self(element.as_element())
 			.component(ToggleState::new(Toggle(default)))
+	}
+
+	// Bypasses the 'static requirement which is necessary when using Toggleable directly.
+	pub fn toggle_on_click(self) -> Self where Self: AsElement + Copy {
+		self.on_click(move |_| self.toggle())
 	}
 }
