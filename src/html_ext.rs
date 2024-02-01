@@ -1,7 +1,6 @@
 use hobo::{prelude::*, create as e};
 use super::entity_ext::AsEntityExt;
 pub use tap::prelude::*;
-use hobo::signal::SignalExt;
 
 pub trait AExt: AsElement + Copy {
 	#[must_use] #[inline] fn untrusted<'a>(self) -> Self { self.set_untrusted(); self }
