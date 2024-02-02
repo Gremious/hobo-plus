@@ -146,6 +146,11 @@ pub trait AsElementExt: AsElement {
 		self.class_typed_signal::<HideSignalStyleTag, _, _>(signal.map(move |x| if x { css::properties![css::display::none] } else { css::properties![] }))
 	}
 
+	fn show_signal(self, signal: impl hobo::signal::Signal<Item=bool> + 'static) -> Self where Self: 'static {
+		struct HideSignalStyleTag;
+		self.class_typed_signal::<HideSignalStyleTag, _, _>(signal.map(move |x| if x { css::properties![] } else { css::properties![css::display::none] }))
+	}
+
 	/// The chaining counterpart of [set_on_slide](Self::set_on_slide).
 	fn on_slide(self, f: impl FnMut(f64) + 'static) -> Self where Self: Sized + Copy + 'static { self.add_on_slide(f); self }
 
