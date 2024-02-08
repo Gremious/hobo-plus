@@ -36,24 +36,25 @@ fn closure_mut<T: wasm_bindgen::convert::FromWasmAbi + 'static> (closure: impl F
 }
 
 pub fn animation(f: impl FnMut(f64) -> bool + 'static) {
-	animation_with_window(window(), f);
+	animation_with_window(&window(), f);
 }
 
 // run a function every frame until it returns false
 // fn argument is delta milliseconds
 // skips the first frame immediately after because it's not possible to calculate time delta
-pub fn animation_with_window(window: web_sys::Window, mut f: impl FnMut(f64) -> bool + 'static) {
+#[allow(clippy::clone_on_ref_ptr)]
+pub fn animation_with_window(window: &web_sys::Window, mut f: impl FnMut(f64) -> bool + 'static) {
 	use std::{cell::RefCell, rc::Rc};
 
 	// this weird refcelling is necessary for "recursion"
 	let cb = Rc::new(RefCell::new(None as Option<Closure<dyn FnMut(f64) + 'static>>));
 	let mut last_timestamp = None;
 	*cb.borrow_mut() = Some(Closure::wrap(Box::new(#[clown::clown] |timestamp| {
-		let cb = honk!(cb).clone();
+		let cb = Rc::clone(&honk!(cb));
 		let window = honk!(window).clone();
 
 		if window.closed().unwrap_or(true) { let _drop = cb.borrow_mut().take(); return; }
-		let last_timestamp = if let Some(x) = last_timestamp.as_mut() { x } else {
+		let Some(last_timestamp) = last_timestamp.as_mut() else {
 			window.request_animation_frame(cb.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap();
 			last_timestamp = Some(timestamp);
 			return;

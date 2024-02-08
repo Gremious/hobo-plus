@@ -2,9 +2,11 @@ use hobo::prelude::*;
 use futures::future::FutureExt;
 
 pub trait AsEntityExt: AsEntity {
+	#[must_use]
 	fn bundle<C: 'static>(self, x: C) -> Self where Self: Sized { self.add_bundle(x); self }
 	fn add_bundle<C: 'static>(&self, x: C) { self.get_cmp_mut_or_default::<Vec<C>>().push(x) }
 
+	#[allow(clippy::type_complexity)]
 	fn get_mutable_write<T: 'static>(&self) -> hobo::owning_ref::OwningHandle<
 		hobo::owning_ref::OwningRef<
 			StorageGuard<
@@ -19,6 +21,7 @@ pub trait AsEntityExt: AsEntity {
 		hobo::signal::MutableLockMut<'static, T>,
 	> { hobo::owning_ref::OwningHandle::new_with_fn(self.get_cmp::<hobo::signal::Mutable<T>>(), |x| unsafe { (*x).lock_mut() }) }
 
+	#[allow(clippy::type_complexity)]
 	fn get_mutable_read<T: 'static>(&self) -> hobo::owning_ref::OwningHandle<
 		hobo::owning_ref::OwningRef<
 			StorageGuard<
@@ -52,7 +55,7 @@ pub trait AsEntityExt: AsEntity {
 		self.get_cmp_mut_or_default::<hobo::entity::FutureHandlesCollection>().0.push(handle);
 	}
 
-	fn spawn_complain_in<F: FnOnce(&Self) -> Fut, Fut: std::future::Future<Output = anyhow::Result<T>> + 'static, T>(self, f: F) -> Self where Self: Sized { self.spawn_complain(f(&self)); self }
+	#[must_use] fn spawn_complain_in<F: FnOnce(&Self) -> Fut, Fut: std::future::Future<Output = anyhow::Result<T>> + 'static, T>(self, f: F) -> Self where Self: Sized { self.spawn_complain(f(&self)); self }
 }
 
 impl<T: AsEntity> AsEntityExt for T {}

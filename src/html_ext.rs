@@ -3,8 +3,8 @@ use super::entity_ext::AsEntityExt;
 pub use tap::prelude::*;
 
 pub trait AExt: AsElement + Copy {
-	#[must_use] #[inline] fn untrusted<'a>(self) -> Self { self.set_untrusted(); self }
-	#[inline] fn set_untrusted<'a>(self) { self.attr(web_str::target(), web_str::_blank()).set_attr(web_str::rel(), "noopener noreferrer"); }
+	#[must_use] #[inline] fn untrusted(self) -> Self { self.set_untrusted(); self }
+	#[inline] fn set_untrusted(self) { self.attr(web_str::target(), web_str::_blank()).set_attr(web_str::rel(), "noopener noreferrer"); }
 }
 
 impl AExt for e::A {}
@@ -22,8 +22,8 @@ pub trait ToggleableExt: std::ops::Deref<Target = Toggleable> + Sized {
 	fn set_on_toggle(self, mut f: impl FnMut(bool) + 'static) {
 		self.add_bundle(self.get_cmp::<ToggleState>().signal().subscribe(move |x| f(x.0)));
 	}
-	fn on_toggle(self, f: impl FnMut(bool) + 'static) -> Self where Self: Copy { self.set_on_toggle(f); self }
-	fn with_on_toggle(self, mut f: impl FnMut(&Self, bool) + 'static) -> Self where Self: Copy + 'static { self.on_toggle(move |e| f(&self, e)) }
+	#[must_use] fn on_toggle(self, f: impl FnMut(bool) + 'static) -> Self where Self: Copy { self.set_on_toggle(f); self }
+	#[must_use] fn with_on_toggle(self, mut f: impl FnMut(&Self, bool) + 'static) -> Self where Self: Copy + 'static { self.on_toggle(move |e| f(&self, e)) }
 
 	fn value(self) -> bool {
 		self.get_cmp::<ToggleState>().lock_ref().0
@@ -41,7 +41,7 @@ pub trait ToggleableExt: std::ops::Deref<Target = Toggleable> + Sized {
 		self.get_cmp::<ToggleState>().signal_ref(|x| x.0)
 	}
 
-	fn toggle_on_click(self) -> Self where Self: AsElement + Copy + 'static { self.on_click(move |_| self.toggle()) }
+	#[must_use] fn toggle_on_click(self) -> Self where Self: AsElement + Copy + 'static { self.on_click(move |_| self.toggle()) }
 }
 
 impl<D: std::ops::Deref<Target = Toggleable> + Sized> ToggleableExt for D {}
@@ -60,7 +60,5 @@ impl Toggleable {
 	}
 
 	// Bypasses the 'static requirement which is necessary when using Toggleable directly.
-	pub fn toggle_on_click(self) -> Self where Self: AsElement + Copy {
-		self.on_click(move |_| self.toggle())
-	}
+	#[must_use] pub fn toggle_on_click(self) -> Self where Self: AsElement + Copy { self.on_click(move |_| self.toggle()) }
 }

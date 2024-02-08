@@ -45,14 +45,14 @@ pub trait AsElementExt: AsElement {
 
 		self.add_component(Clicked(false));
 		self.add_on_mouse_down(move |e| { e.prevent_default(); self.get_cmp_mut::<Clicked>().0 = true; });
-		self.bundle(window.on_mouse_up(move |_| self.get_cmp_mut::<Clicked>().0 = false));
+		self.add_bundle(window.on_mouse_up(move |_| self.get_cmp_mut::<Clicked>().0 = false));
 
 		self
 	}
 
 	/// This will panic at runtime if the `Clicked` component is not present.
 	/// Make sure to actually call report_clicked() on the element first.
-	fn clicked(&self) -> bool { self.try_get_cmp::<Clicked>().and_then(|x| Some(x.0)).unwrap_or(false) }
+	fn clicked(&self) -> bool { self.try_get_cmp::<Clicked>().map_or(false, |x| x.0) }
 
 	#[must_use]
 	fn font(self, style: &css::Style) -> Self { self.class_typed::<FontTag>(style.clone()) }

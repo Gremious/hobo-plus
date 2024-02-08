@@ -1,3 +1,5 @@
+#![allow(clippy::type_complexity)]
+
 use hobo::prelude::*;
 
 pub struct ChildrenDiffConfig<K, V, E, Insert, OnChange, OnRemove, OnUpdate> {
@@ -33,7 +35,7 @@ impl<K, V, E, Insert, OnChange, OnRemove, OnUpdate> ChildrenDiffConfigBuilder<K,
 	OnRemove: FnMut(&K) + 'static,
 	OnUpdate: FnMut(&K, &hobo::signal::Mutable<V>) + 'static,
 {
-	pub fn insert(mut self, f: Insert) -> Self { self.insert = Some(f); self }
+	#[must_use] pub fn insert(mut self, f: Insert) -> Self { self.insert = Some(f); self }
 	pub fn on_change<NewOnChange>(self, f: NewOnChange) -> ChildrenDiffConfigBuilder<K, V, E, Insert, NewOnChange, OnRemove, OnUpdate> where
 		NewOnChange: FnMut() + 'static,
 	{ ChildrenDiffConfigBuilder {
@@ -125,6 +127,7 @@ impl<K, V> ChildrenDiff<K, V> where
 }
 
 pub trait ChildrenDiffElementExt: AsElement {
+	#[must_use]
 	fn children_diff<K, V, E, Insert, OnChange, OnRemove, OnUpdate>(self, config: ChildrenDiffConfigBuilder<K, V, E, Insert, OnChange, OnRemove, OnUpdate>) -> Self where
 		Self: Sized + Copy + 'static,
 		K: Ord + Clone + std::hash::Hash + 'static,

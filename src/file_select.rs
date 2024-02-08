@@ -47,9 +47,9 @@ impl std::future::Future for FileSelect {
 							*input.get_cmp_mut::<TaskState>() = TaskState::LoadFile;
 						}
 
-						honk!(cx.waker()).clone().wake();
+						honk!(cx.waker()).wake_by_ref();
 					})
-					.component(document().on_focus(#[clown::clown] |_| {
+					.add_component(document().on_focus(#[clown::clown] |_| {
 						let waker = honk!(cx.waker()).clone();
 						input.spawn(async move {
 							async_timer::interval(std::time::Duration::from_secs(1)).wait().await;
@@ -58,7 +58,7 @@ impl std::future::Future for FileSelect {
 							let mut task_state = input.get_cmp_mut::<TaskState>();
 							if *task_state == TaskState::WaitingForFileSelect {
 								*task_state = TaskState::Errored(FileError::Canceled);
-								waker.clone().wake();
+								waker.wake_by_ref();
 							};
 						});
 					}));
