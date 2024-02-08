@@ -13,6 +13,7 @@ pub struct Clicked(pub bool);
 
 pub trait AsElementExt: AsElement {
 	/// Adds an `data-name` attribute to the element with a value of T
+	#[must_use]
 	fn name_typed<T: 'static>(self) -> Self {
 		if self.is_dead() { log::warn!("mark dead {:?}", self.as_entity()); return self; }
 		let name = core::any::type_name::<T>();
@@ -20,6 +21,7 @@ pub trait AsElementExt: AsElement {
 		self.attr("data-name", name)
 	}
 
+	#[must_use]
 	fn mark_and_name<T: 'static>(self) -> Self { self.mark::<T>().name_typed::<T>() }
 
 	/// Adds the `Clicked` component to an element which allows you to tell whether it is currently being clicked on (mousedown active).
@@ -27,6 +29,7 @@ pub trait AsElementExt: AsElement {
 	/// Uses the default window (e.g. [web_sys::window()]).
 	///
 	/// See: `clicked()`.
+	#[must_use]
 	fn report_clicked(self) -> Self where Self: Sized + Copy + 'static {
 		self.report_clicked_on_window(window())
 	}
@@ -36,14 +39,14 @@ pub trait AsElementExt: AsElement {
 	/// Uses the passed in [web_sys::Window].
 	///
 	/// See: `clicked()`.
+	#[must_use]
 	fn report_clicked_on_window(self, window: web_sys::Window) -> Self where Self: Sized + Copy + 'static {
-		if self.try_get_cmp::<Clicked>().is_some() {
-			return self;
-		} else {
-			self.add_component(Clicked(false));
-			self.add_on_mouse_down(move |e| { e.prevent_default(); self.get_cmp_mut::<Clicked>().0 = true; });
-			self.bundle(window.on_mouse_up(move |_| self.get_cmp_mut::<Clicked>().0 = false));
-		}
+		if self.try_get_cmp::<Clicked>().is_some() { return self; }
+
+		self.add_component(Clicked(false));
+		self.add_on_mouse_down(move |e| { e.prevent_default(); self.get_cmp_mut::<Clicked>().0 = true; });
+		self.bundle(window.on_mouse_up(move |_| self.get_cmp_mut::<Clicked>().0 = false));
+
 		self
 	}
 
@@ -51,6 +54,7 @@ pub trait AsElementExt: AsElement {
 	/// Make sure to actually call report_clicked() on the element first.
 	fn clicked(&self) -> bool { self.try_get_cmp::<Clicked>().and_then(|x| Some(x.0)).unwrap_or(false) }
 
+	#[must_use]
 	fn font(self, style: &css::Style) -> Self { self.class_typed::<FontTag>(style.clone()) }
 
 	// client_rect.width()/.height() are with padding + border
@@ -110,7 +114,7 @@ pub trait AsElementExt: AsElement {
 				};
 				new_style.push(property);
 			} else {
-				log::warn!("Flip on element with a non-pixel position! (or not top/bottom?)")
+				log::warn!("Flip on element with a non-pixel position! (or not top/bottom?)");
 			}
 		}
 
@@ -134,24 +138,27 @@ pub trait AsElementExt: AsElement {
 				};
 				new_style.push(property);
 			} else {
-				log::warn!("Flip on element with a non-pixel position! (or not left/right?)")
+				log::warn!("Flip on element with a non-pixel position! (or not left/right?)");
 			}
 		}
 
 		self.set_style(new_style);
 	}
 
+	#[must_use]
 	fn hide_signal(self, signal: impl hobo::signal::Signal<Item=bool> + 'static) -> Self where Self: 'static {
 		struct HideSignalStyleTag;
 		self.class_typed_signal::<HideSignalStyleTag, _, _>(signal.map(move |x| if x { css::properties![css::display::none] } else { css::properties![] }))
 	}
 
+	#[must_use]
 	fn show_signal(self, signal: impl hobo::signal::Signal<Item=bool> + 'static) -> Self where Self: 'static {
 		struct HideSignalStyleTag;
 		self.class_typed_signal::<HideSignalStyleTag, _, _>(signal.map(move |x| if x { css::properties![] } else { css::properties![css::display::none] }))
 	}
 
 	/// The chaining counterpart of [set_on_slide](Self::set_on_slide).
+	#[must_use]
 	fn on_slide(self, f: impl FnMut(f64) + 'static) -> Self where Self: Sized + Copy + 'static { self.add_on_slide(f); self }
 
 	/// Provides a closure which triggers on mouse move, only while the element is clicked.
@@ -169,11 +176,13 @@ pub trait AsElementExt: AsElement {
 			}));
 	}
 
+	#[must_use]
 	fn with_on_slide(self, mut f: impl FnMut(&Self, f64) + 'static) -> Self where Self: Sized + Copy + 'static {
 		self.on_slide(move |e| f(&self, e))
 	}
 
 	/// The chaining counterpart of [set_on_first_flow](Self::set_on_first_flow).
+	#[must_use]
 	fn on_next_flow(self, f: impl FnOnce() + 'static) -> Self where Self: Sized + Copy + 'static {
 		self.set_on_next_flow(f); self
 	}
@@ -185,7 +194,7 @@ pub trait AsElementExt: AsElement {
 	///
 	/// However, if used in conjunction with a function that is called multiple times, e.g.
 	/// ```ignore
-	///		window().on_resize(move |_| element.set_on_next_flow(|| /* ... */ ))
+	///    window().on_resize(move |_| element.set_on_next_flow(|| /* ... */ ))
 	/// ```
 	/// it will re-trigger after each reflow.
 	///
@@ -195,6 +204,7 @@ pub trait AsElementExt: AsElement {
 	}
 
 	/// The chaining counterpart of [set_on_intersection](Self::set_on_intersection).
+	#[must_use]
 	fn on_intersection(self, f: impl FnMut(Vec<web_sys::IntersectionObserverEntry>) + 'static) -> Self where Self: Copy + 'static {
 		self.set_on_intersection(f);
 		self

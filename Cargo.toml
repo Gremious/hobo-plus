@@ -26,4 +26,8 @@ features = [
 	"IntersectionObserverInit",
 	"IntersectionObserverEntry",
 	"Url", "MediaSource","Blob",
+	"DomRect",
 ]
+
+[lints]
+workspace = true
