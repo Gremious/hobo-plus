@@ -154,7 +154,7 @@ impl<K, V> ChildrenDiff<K, V> where
 		self.unprocessed_ids.insert(key);
 	}
 
-	pub fn clear(&mut self) {
+	pub fn clear(&self) {
 		self.mutable.lock_mut().clear();
 	}
 }
@@ -234,15 +234,16 @@ pub trait ChildrenDiffElementExt: AsElement {
 							on_remove(&key);
 						}
 
-						let mut children_diff = self.get_cmp_mut::<ChildrenDiff<K, V>>();
-						children_diff.unprocessed_ids.clear();
+						self.get_cmp_mut::<ChildrenDiff<K, V>>().unprocessed_ids.clear();
 
+						let mut items = std::collections::BTreeMap::<K, hobo::Element>::new();
 						for (key, value) in entries {
 							let element = insert(&key, FunnyValue::new(self.as_element(), key.clone(), value)).as_element();
 							self.add_child(element);
-							children_diff.items.insert(key.clone(), element);
+							items.insert(key.clone(), element);
 						}
-						if !children_diff.unprocessed_ids.is_empty() { return; }
+
+						self.get_cmp_mut::<ChildrenDiff<K, V>>().items = items;
 					}
 
 					on_change();
