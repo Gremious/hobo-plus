@@ -153,6 +153,10 @@ impl<K, V> ChildrenDiff<K, V> where
 		self.mutable.lock_mut().remove(&key);
 		self.unprocessed_ids.insert(key);
 	}
+
+	pub fn clear(&mut self) {
+		self.mutable.lock_mut().clear();
+	}
 }
 
 pub trait ChildrenDiffElementExt: AsElement {
