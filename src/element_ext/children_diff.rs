@@ -11,6 +11,8 @@ pub struct FunnyValue<K, V> where
 {
 	element: hobo::Element,
 	key: K,
+	initial_value: V,
+	broadcaster: hobo::signal::Broadcaster<hobo::signal_map::MapWatchKeySignal<hobo::signal_map::MutableSignalMap<K, V>>>,
 	_pd: std::marker::PhantomData<(K, V)>,
 }
 
@@ -18,8 +20,17 @@ impl<K, V> FunnyValue<K, V> where
 	K: Ord + Clone + std::hash::Hash + 'static,
 	V: Clone + 'static,
 {
+	fn new(element: hobo::Element, key: K, initial_value: V) -> Self {
+		let broadcaster = element.get_cmp::<ChildrenDiff<K, V>>().mutable.signal_map_cloned().key_cloned(key.clone()).broadcast();
+		Self { element, key, initial_value, broadcaster, _pd: std::marker::PhantomData }
+	}
+
 	pub fn current(&self) -> V {
 		self.element.get_cmp::<ChildrenDiff<K, V>>().mutable.lock_ref().get(&self.key).unwrap().clone()
+	}
+	
+	pub fn map_ref<R>(&self, f: impl FnOnce(&V) -> R) -> R {
+		f(self.element.get_cmp::<ChildrenDiff<K, V>>().mutable.lock_ref().get(&self.key).unwrap())
 	}
 
 	pub fn update(&self, f: impl FnOnce(&mut V)) {
@@ -28,13 +39,10 @@ impl<K, V> FunnyValue<K, V> where
 		self.element.get_cmp::<ChildrenDiff<K, V>>().mutable.lock_mut().insert_cloned(self.key.clone(), current);
 	}
 
-	// TODO: maybe instead of making a new singla every time - just use Broadcaster
 	pub fn signal(&self) -> impl hobo::signal::Signal<Item = V> + 'static {
-		self.element.get_cmp::<ChildrenDiff<K, V>>().mutable.signal_map_cloned().key_cloned(self.key.clone()).map(Option::unwrap)
+		self.broadcaster.signal_cloned().map({ let initial = self.initial_value.clone(); move |x| x.unwrap_or_else(|| initial.clone()) })
 	}
 }
-
-// type KeySignal<K, V> = hobo::signal::Broadcaster<hobo::signal::Map<hobo::signal_map::MapWatchKeySignal<hobo::signal_map::MutableSignalMap<K, V>>, fn(std::option::Option<V>) -> V>>;
 
 pub struct ChildrenDiffConfig<K, V, E, Insert, OnChange, OnRemove, OnUpdate> {
 	insert: Insert,
@@ -124,7 +132,7 @@ pub struct ChildrenDiff<K, V> where
 }
 
 impl<K, V> ChildrenDiff<K, V> where
-	K: Ord + Clone + std::hash::Hash + 'static,
+	K: Ord + Clone + std::hash::Hash + std::fmt::Debug + 'static,
 	V: Clone + 'static,
 {
 	pub fn upsert(&mut self, key: K, value: V) {
@@ -135,7 +143,7 @@ impl<K, V> ChildrenDiff<K, V> where
 
 	pub fn update_with(&mut self, key: K, f: impl FnOnce(&mut V)) {
 		let mut mutable_lock = self.mutable.lock_mut();
-		let mut value = mutable_lock.get(&key).unwrap().clone();
+		let Some(mut value) = mutable_lock.get(&key).cloned() else { log::warn!("Tried to update non-existing key: {key:?}"); return; };
 		f(&mut value);
 		mutable_lock.insert_cloned(key.clone(), value);
 		self.unprocessed_ids.insert(key);
@@ -163,13 +171,9 @@ pub trait ChildrenDiffElementExt: AsElement {
 		let mutable = MutableBTreeMap::<K, V>::new();
 		self
 			.component(mutable.signal_map_cloned().subscribe(move |diff| match diff {
-				MapDiff::Insert { key, .. } => {
+				MapDiff::Insert { key, value } => {
 					{
-						// let signal: hobo::signal::Map<hobo::signal_map::MapWatchKeySignal<hobo::signal_map::MutableSignalMap<K, V>>, fn(Option<V>) -> V> =
-						//     self.get_cmp::<ChildrenDiff<K, V>>().mutable.signal_map_cloned().key_cloned(key.clone()).map(Option::unwrap);
-						let funny_value = FunnyValue { element: self.as_element(), key: key.clone(), _pd: std::marker::PhantomData::<(K, V)> };
-
-						let element = insert(&key, funny_value).as_element();
+						let element = insert(&key, FunnyValue::new(self.as_element(), key.clone(), value)).as_element();
 						self.add_child(element);
 
 						let mut children_diff = self.get_cmp_mut::<ChildrenDiff<K, V>>();
@@ -204,7 +208,41 @@ pub trait ChildrenDiffElementExt: AsElement {
 
 					on_change();
 				},
-				MapDiff::Replace { .. } | MapDiff::Clear { } => unimplemented!(),
+				MapDiff::Clear { } => {
+					{
+						let items = std::mem::take(&mut self.get_cmp_mut::<ChildrenDiff<K, V>>().items);
+						for (key, element) in items {
+							element.remove();
+							on_remove(&key);
+						}
+
+						let mut children_diff = self.get_cmp_mut::<ChildrenDiff<K, V>>();
+						children_diff.unprocessed_ids.clear();
+					}
+
+					on_change();
+				},
+				MapDiff::Replace { entries } => {
+					{
+						let items = std::mem::take(&mut self.get_cmp_mut::<ChildrenDiff<K, V>>().items);
+						for (key, element) in items {
+							element.remove();
+							on_remove(&key);
+						}
+
+						let mut children_diff = self.get_cmp_mut::<ChildrenDiff<K, V>>();
+						children_diff.unprocessed_ids.clear();
+
+						for (key, value) in entries {
+							let element = insert(&key, FunnyValue::new(self.as_element(), key.clone(), value)).as_element();
+							self.add_child(element);
+							children_diff.items.insert(key.clone(), element);
+						}
+						if !children_diff.unprocessed_ids.is_empty() { return; }
+					}
+
+					on_change();
+				},
 			}))
 			.component(ChildrenDiff { mutable, element: self.as_element(), items: Default::default(), unprocessed_ids: Default::default() })
 	}
