@@ -22,7 +22,7 @@ pub fn spawn_complain<T>(x: impl std::future::Future<Output = anyhow::Result<T>>
 				lvl,
 				&(log::__private_api::module_path!(), log::__private_api::module_path!(), caller.file()),
 				caller.line(),
-				log::__private_api::Option::None,
+				None,
 			);
 		}
 	}));
