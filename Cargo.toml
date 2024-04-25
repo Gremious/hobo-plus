@@ -8,7 +8,7 @@ anyhow = "1"
 async-timer = "1.0.0-beta.12"
 clown = "1"
 futures = "0.3"
-hobo = "0.4"
+hobo = { version = "0.4", features = ["experimental"] }
 js-sys = "0.3"
 log = "0.4"
 tap = "1"
@@ -16,8 +16,8 @@ thiserror = "1"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 
-# [target.'cfg(target_arch = "wasm32")'.dependencies]
-# getrandom = { version = "*", features = ["js"] } # because of rand
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "*", features = ["js"] } # because of rand
 
 [dependencies.web-sys]
 version = "0.3"
