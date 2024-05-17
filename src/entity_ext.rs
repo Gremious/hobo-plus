@@ -48,7 +48,7 @@ pub trait AsEntityExt: AsEntity {
 					lvl,
 					&(log::__private_api::module_path!(), log::__private_api::module_path!(), caller.file()),
 					caller.line(),
-					None,
+					&[] as &[(&str, &str)],
 				);
 			}
 		}), Default::default);
