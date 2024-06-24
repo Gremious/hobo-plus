@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
-async-timer = "1.0.0-beta.13"
+async-timer = "=1.0.0-beta.12"
 clown = "1"
 futures = "0.3"
 hobo = { version = "0.4", features = ["experimental"] }
