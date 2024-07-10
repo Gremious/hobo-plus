@@ -20,8 +20,7 @@ pub fn spawn_complain<T>(x: impl std::future::Future<Output = anyhow::Result<T>>
 			log::__private_api::log(
 				log::__private_api::format_args!("{e:?}"),
 				lvl,
-				&(log::__private_api::module_path!(), log::__private_api::module_path!(), caller.file()),
-				caller.line(),
+				&(log::__private_api::module_path!(), log::__private_api::module_path!(), caller),
 				(),
 			);
 		}
