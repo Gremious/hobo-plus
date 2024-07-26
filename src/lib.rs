@@ -3,7 +3,7 @@
 use hobo::prelude::*;
 use futures::future::FutureExt;
 pub use entity_ext::AsEntityExt;
-pub use element_ext::{children_diff::{ChildrenDiff, ChildrenDiffConfig, ChildrenDiffConfigBuilder, ChildrenDiffElementExt, FunnyValue}, AsElementExt, FontTag, Clicked};
+pub use element_ext::{children_diff::{ChildrenDiff, ChildrenDiffConfig, ChildrenDiffConfigBuilder, ChildrenDiffElementExt, SeriousValue}, AsElementExt, FontTag, Clicked};
 pub use html_ext::{AExt, Toggleable, ToggleableExt};
 
 mod html_ext;
