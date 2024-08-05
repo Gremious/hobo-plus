@@ -5,11 +5,14 @@ use futures::future::FutureExt;
 pub use entity_ext::AsEntityExt;
 pub use element_ext::{children_diff::{ChildrenDiff, ChildrenDiffConfig, ChildrenDiffConfigBuilder, ChildrenDiffElementExt, SeriousValue}, AsElementExt, FontTag, Clicked};
 pub use html_ext::{AExt, Toggleable, ToggleableExt};
+pub use svg::xml_to_svg;
+pub use __svgs as svgs;
 
 mod html_ext;
 mod entity_ext;
 mod element_ext;
 pub mod file_select;
+pub mod svg;
 
 #[track_caller]
 pub fn spawn_complain<T>(x: impl std::future::Future<Output = anyhow::Result<T>> + 'static) {
