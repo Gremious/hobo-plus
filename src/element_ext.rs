@@ -157,14 +157,11 @@ pub trait AsElementExt: AsElement {
 		self.class_typed_signal::<HideSignalStyleTag, _, _>(signal.map(move |x| if x { css::properties![] } else { css::properties![css::display::none] }))
 	}
 
-	/// The chaining counterpart of [set_on_slide](Self::set_on_slide).
 	#[must_use]
 	fn on_slide(self, f: impl FnMut(f64) + 'static) -> Self where Self: Sized + Copy + 'static { self.add_on_slide(f); self }
 
 	/// Provides a closure which triggers on mouse move, only while the element is clicked.
 	/// It captures a normalized `f64` which indicates where the mouse currently is on the element (left-right).
-	///
-	/// This is a non-chaining function. For the chaining counterpart, see [on_slide](Self::on_slide).
 	fn add_on_slide(self, mut f: impl FnMut(f64) + 'static) where Self: Sized + Copy + 'static {
 		self
 			.report_clicked()
@@ -181,7 +178,6 @@ pub trait AsElementExt: AsElement {
 		self.on_slide(move |e| f(&self, e))
 	}
 
-	/// The chaining counterpart of [set_on_first_flow](Self::set_on_first_flow).
 	#[must_use]
 	fn on_next_flow(self, f: impl FnOnce() + 'static) -> Self where Self: Sized + Copy + 'static {
 		self.set_on_next_flow(f); self
@@ -197,13 +193,10 @@ pub trait AsElementExt: AsElement {
 	///    window().on_resize(move |_| element.set_on_next_flow(|| /* ... */ ))
 	/// ```
 	/// it will re-trigger after each reflow.
-	///
-	/// This is a non-chaining function. For the chaining counterpart, see [on_first_flow](Self::on_first_flow).
 	fn set_on_next_flow(self, f: impl FnOnce() + 'static) where Self: Sized + Copy + 'static {
 		window().request_animation_frame(Closure::once_into_js(f).unchecked_ref()).unwrap();
 	}
 
-	/// The chaining counterpart of [set_on_intersection](Self::set_on_intersection).
 	#[must_use]
 	fn on_intersection(self, f: impl FnMut(Vec<web_sys::IntersectionObserverEntry>) + 'static) -> Self where Self: Copy + 'static {
 		self.set_on_intersection(f);
@@ -215,8 +208,6 @@ pub trait AsElementExt: AsElement {
 	/// Creates a new observer with the passed in parameters,
 	/// saves the closure and the observer as a component,
 	/// and then immediately calls observe on the element,
-	///
-	/// This is a non-chaining function. For the chaining counterpart, see [on_intersection](Self::on_intersection).
 	fn set_on_intersection(self, f: impl FnMut(Vec<web_sys::IntersectionObserverEntry>) + 'static) {
 		let closure = closure_mut(f);
 
