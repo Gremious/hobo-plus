@@ -218,6 +218,10 @@ pub trait AsElementExt: AsElement {
 		self.add_component(observer);
 	}
 
+	fn scroll_to_start(&self) {
+		self.get_cmp::<web_sys::HtmlDivElement>().scroll_to_with_x_and_y(0., 0.);
+	}
+
 	fn scroll_to_end(&self) {
 		let ele = self.get_cmp::<web_sys::HtmlDivElement>();
 		ele.scroll_to_with_x_and_y(0., ele.scroll_height().into());
