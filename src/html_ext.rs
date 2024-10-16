@@ -11,7 +11,7 @@ impl AExt for e::A {}
 
 /// Generic `bool` component for checbox/switch like events.
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
-pub struct Toggle(bool);
+pub struct Toggle(pub bool);
 type ToggleState = hobo::signal::Mutable<Toggle>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, AsElement)]
