@@ -9,9 +9,10 @@ pub trait AExt: AsElement + Copy {
 
 impl AExt for e::A {}
 
+// Don't make this public, make a Toggleable and use it's value_signals/set_value
 /// Generic `bool` component for checbox/switch like events.
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
-pub struct Toggle(pub bool);
+struct Toggle(pub bool);
 type ToggleState = hobo::signal::Mutable<Toggle>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, AsElement)]
