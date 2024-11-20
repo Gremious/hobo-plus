@@ -14,22 +14,6 @@ mod element_ext;
 pub mod file_select;
 pub mod svg;
 
-#[track_caller]
-pub fn spawn_complain<T>(x: impl std::future::Future<Output = anyhow::Result<T>> + 'static) {
-	let caller = std::panic::Location::caller();
-	wasm_bindgen_futures::spawn_local(x.map(|res| if let Err(e) = res {
-		let lvl = log::Level::Error;
-		if lvl <= log::STATIC_MAX_LEVEL && lvl <= log::max_level() {
-			log::__private_api::log(
-				log::__private_api::format_args!("{e:?}"),
-				lvl,
-				&(log::__private_api::module_path!(), log::__private_api::module_path!(), caller),
-				(),
-			);
-		}
-	}));
-}
-
 pub fn window() -> web_sys::Window { web_sys::window().expect("no window") }
 pub fn document() -> web_sys::Document { window().document().expect("no document") }
 
