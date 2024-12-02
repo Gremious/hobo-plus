@@ -18,9 +18,6 @@ thiserror = "2"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-getrandom = { version = "*", features = ["js"] } # because of rand
-
 [dependencies.web-sys]
 version = "0.3"
 features = [
