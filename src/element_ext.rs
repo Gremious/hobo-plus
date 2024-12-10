@@ -52,7 +52,7 @@ pub trait AsElementExt: AsElement {
 
 	/// This will panic at runtime if the `Clicked` component is not present.
 	/// Make sure to actually call report_clicked() on the element first.
-	fn clicked(&self) -> bool { self.try_get_cmp::<Clicked>().map_or(false, |x| x.0) }
+	fn clicked(&self) -> bool { self.try_get_cmp::<Clicked>().is_some_and(|x| x.0) }
 
 	#[must_use]
 	fn font(self, style: &css::Style) -> Self { self.class_typed::<FontTag>(style.clone()) }
