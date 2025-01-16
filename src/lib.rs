@@ -27,7 +27,7 @@ pub fn animation(f: impl FnMut(f64) -> bool + 'static) {
 // run a function every frame until it returns false
 // fn argument is delta milliseconds
 // skips the first frame immediately after because it's not possible to calculate time delta
-#[allow(clippy::clone_on_ref_ptr)]
+#[expect(clippy::clone_on_ref_ptr)]
 pub fn animation_with_window(window: &web_sys::Window, mut f: impl FnMut(f64) -> bool + 'static) {
 	use std::{cell::RefCell, rc::Rc};
 

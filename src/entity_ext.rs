@@ -6,7 +6,7 @@ pub trait AsEntityExt: AsEntity {
 	fn bundle<C: 'static>(self, x: C) -> Self where Self: Sized { self.add_bundle(x); self }
 	fn add_bundle<C: 'static>(&self, x: C) { self.get_cmp_mut_or_default::<Vec<C>>().push(x) }
 
-	#[allow(clippy::type_complexity)]
+	#[expect(clippy::type_complexity)]
 	fn get_mutable_write<T: 'static>(&self) -> hobo::owning_ref::OwningHandle<
 		hobo::owning_ref::OwningRef<
 			StorageGuard<
@@ -21,7 +21,7 @@ pub trait AsEntityExt: AsEntity {
 		hobo::signal::MutableLockMut<'static, T>,
 	> { hobo::owning_ref::OwningHandle::new_with_fn(self.get_cmp::<hobo::signal::Mutable<T>>(), |x| unsafe { (*x).lock_mut() }) }
 
-	#[allow(clippy::type_complexity)]
+	#[expect(clippy::type_complexity)]
 	fn get_mutable_read<T: 'static>(&self) -> hobo::owning_ref::OwningHandle<
 		hobo::owning_ref::OwningRef<
 			StorageGuard<

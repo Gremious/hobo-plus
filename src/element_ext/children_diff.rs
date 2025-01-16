@@ -1,4 +1,4 @@
-#![allow(clippy::type_complexity)]
+#![expect(clippy::type_complexity)]
 
 use hobo::prelude::*;
 use hobo::{signal_map::{MapDiff, MutableBTreeMap, SignalMapExt}, signal::SignalExt};
