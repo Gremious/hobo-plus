@@ -12,6 +12,7 @@ mod entity_ext;
 mod element_ext;
 pub mod file_select;
 pub mod svg;
+pub mod socket;
 
 pub fn window() -> web_sys::Window { web_sys::window().expect("no window") }
 pub fn document() -> web_sys::Document { window().document().expect("no document") }
