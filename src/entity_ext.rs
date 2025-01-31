@@ -40,7 +40,6 @@ pub trait AsEntityExt: AsEntity {
 	fn spawn_complain<T>(&self, f: impl std::future::Future<Output = anyhow::Result<T>> + 'static) {
 		let caller = std::panic::Location::caller();
 		let (handle, fut) = hobo::futures_signals::cancelable_future(f.map(|res| if let Err(e) = res {
-
 			let lvl = log::Level::Error;
 			if lvl <= log::STATIC_MAX_LEVEL && lvl <= log::max_level() {
 				log::__private_api::log(
