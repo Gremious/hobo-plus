@@ -43,6 +43,7 @@ pub trait AsEntityExt: AsEntity {
 			let lvl = log::Level::Error;
 			if lvl <= log::STATIC_MAX_LEVEL && lvl <= log::max_level() {
 				log::__private_api::log(
+					log::logger(),
 					log::__private_api::format_args!("{e:?}"),
 					lvl,
 					&(log::__private_api::module_path!(), log::__private_api::module_path!(), caller),
