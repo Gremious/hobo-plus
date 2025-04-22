@@ -29,6 +29,7 @@ features = [
 	"IntersectionObserverEntry",
 	"Url", "MediaSource","Blob",
 	"DomRect",
+	"Document", "Text",
 ]
 
 # [lints]

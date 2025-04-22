@@ -5,8 +5,13 @@ pub fn xml_to_svg(xml_node: &roxmltree::Node) -> web_sys::SvgElement {
 	for attribute in xml_node.attributes() {
 		html_node.set_attribute(wasm_bindgen::intern(attribute.name()), attribute.value()).unwrap();
 	}
-	for child in xml_node.children().filter(roxmltree::Node::is_element) {
-		html_node.append_child(&xml_to_svg(&child)).unwrap();
+	for child in xml_node.children() {
+		if roxmltree::Node::is_element(&child) {
+			html_node.append_child(&xml_to_svg(&child)).unwrap();
+		} else if roxmltree::Node::is_text(&child) {
+			let text_node = document().create_text_node(child.text().unwrap());
+			html_node.append_child(&text_node).unwrap();
+		}
 	}
 	html_node
 }
