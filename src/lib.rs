@@ -1,6 +1,7 @@
 #![feature(proc_macro_hygiene, stmt_expr_attributes)]
 
 use hobo::prelude::*;
+#[allow(unused_imports)] use clown::{clown, honk};
 pub use entity_ext::AsEntityExt;
 pub use element_ext::{children_diff::{ChildrenDiff, ChildrenDiffConfig, ChildrenDiffConfigBuilder, ChildrenDiffElementExt, SeriousValue}, AsElementExt, FontTag, Clicked};
 pub use html_ext::{AExt, Toggleable, ToggleableExt};
@@ -35,7 +36,7 @@ pub fn animation_with_window(window: &web_sys::Window, mut f: impl FnMut(f64) ->
 	// this weird refcelling is necessary for "recursion"
 	let cb = Rc::new(RefCell::new(None as Option<Closure<dyn FnMut(f64) + 'static>>));
 	let mut last_timestamp = None;
-	*cb.borrow_mut() = Some(Closure::wrap(Box::new(#[clown::clown] |timestamp| {
+	*cb.borrow_mut() = Some(Closure::wrap(Box::new(#[clown] |timestamp| {
 		let cb = Rc::clone(&honk!(cb));
 		let window = honk!(window).clone();
 
