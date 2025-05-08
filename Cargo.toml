@@ -9,7 +9,7 @@ anyhow = "1"
 async-timer = "=1.0.0-beta.15"
 clown = "1"
 futures = "0.3"
-hobo = { version = "0.4", features = ["experimental"] }
+hobo = { version = "1.0.0-rc.1", features = ["experimental"] }
 js-sys = "0.3"
 log = "0.4"
 roxmltree = "0.20"
