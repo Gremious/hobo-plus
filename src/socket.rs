@@ -44,7 +44,7 @@ impl<Out: Serialize + 'static> Socket<Out> {
 		let onclose = Closure::<dyn Fn(web_sys::CloseEvent)>::new(#[clown::clown] |_: web_sys::CloseEvent| {
 			let ws = slip!(Rc::downgrade(&ws)).clone();
 
-			let mut interval = async_timer::interval(std::time::Duration::from_secs(5));
+			let mut interval = async_timer::interval(std::time::Duration::from_secs(15));
 			wasm_bindgen_futures::spawn_local(async move { loop {
 				// log::info!("socket closed, try again");
 				interval.wait().await;
