@@ -1,9 +1,9 @@
 #![feature(proc_macro_hygiene, stmt_expr_attributes)]
 
 use hobo::prelude::*;
-#[allow(unused_imports)] use clown::{clown, honk};
+#[allow(unused_imports)] use clown::{clown, honk, slip};
 pub use entity_ext::AsEntityExt;
-pub use element_ext::{children_diff::{ChildrenDiff, ChildrenDiffConfig, ChildrenDiffConfigBuilder, ChildrenDiffElementExt, SeriousValue}, AsElementExt, FontTag, Clicked};
+pub use element_ext::{children_diff::{ChildrenDiff, ChildrenDiffConfig, ChildrenDiffConfigBuilder, ChildrenDiffElementExt, ItemMapping}, AsElementExt, FontTag, Clicked};
 pub use html_ext::{AExt, Toggleable, ToggleableExt};
 pub use svg::xml_to_svg;
 pub use __svgs as svgs;

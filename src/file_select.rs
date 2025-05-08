@@ -1,5 +1,6 @@
 use hobo::{prelude::*, create as e};
 use super::document;
+#[allow(unused_imports)] use super::honk;
 
 struct FileSelect {
 	element: e::Input,

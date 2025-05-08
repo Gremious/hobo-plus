@@ -3,9 +3,8 @@
 use hobo::prelude::*;
 use hobo::{signal_map::{MapDiff, MutableBTreeMap, SignalMapExt}, signal::SignalExt};
 
-// TODO: rename?
 #[derive(Clone)]
-pub struct SeriousValue<K, V> where
+pub struct ItemMapping<K, V> where
 	K: Ord + Clone + std::hash::Hash + 'static,
 	V: Clone + 'static,
 {
@@ -16,7 +15,7 @@ pub struct SeriousValue<K, V> where
 	_pd: std::marker::PhantomData<(K, V)>,
 }
 
-impl<K, V> SeriousValue<K, V> where
+impl<K, V> ItemMapping<K, V> where
 	K: Ord + Clone + std::hash::Hash + 'static,
 	V: Clone + 'static,
 {
@@ -72,7 +71,7 @@ impl<E, Insert> ChildrenDiffConfig<(), (), E, Insert, fn(), fn(&()), fn(&(), &()
 
 impl<K, V, E, Insert, OnChange, OnRemove, OnUpdate> ChildrenDiffConfigBuilder<K, V, E, Insert, OnChange, OnRemove, OnUpdate> where
 	E: hobo::AsElement + 'static,
-	Insert: FnMut(&K, SeriousValue<K, V>) -> E + 'static,
+	Insert: FnMut(&K, ItemMapping<K, V>) -> E + 'static,
 	OnChange: FnMut() + 'static,
 	OnRemove: FnMut(&K) + 'static,
 	OnUpdate: FnMut(&K, &V) + 'static,
@@ -166,7 +165,7 @@ pub trait ChildrenDiffElementExt: AsElement {
 		K: Ord + Clone + std::hash::Hash + Send + 'static,
 		V: Clone + Send + 'static,
 		E: hobo::AsElement + 'static,
-		Insert: FnMut(&K, SeriousValue<K, V>) -> E + 'static,
+		Insert: FnMut(&K, ItemMapping<K, V>) -> E + 'static,
 		OnChange: FnMut() + 'static,
 		OnRemove: FnMut(&K) + 'static,
 		OnUpdate: FnMut(&K, &V) + 'static,
@@ -177,7 +176,7 @@ pub trait ChildrenDiffElementExt: AsElement {
 			.component(mutable.signal_map_cloned().subscribe(move |diff| match diff {
 				MapDiff::Insert { key, value } => {
 					{
-						let element = insert(&key, SeriousValue::new(self.as_element(), key.clone(), value)).as_element();
+						let element = insert(&key, ItemMapping::new(self.as_element(), key.clone(), value)).as_element();
 						self.add_child(element);
 
 						let mut children_diff = self.get_cmp_mut::<ChildrenDiff<K, V>>();
@@ -238,7 +237,7 @@ pub trait ChildrenDiffElementExt: AsElement {
 
 						let mut items = std::collections::BTreeMap::<K, hobo::Element>::new();
 						for (key, value) in entries {
-							let element = insert(&key, SeriousValue::new(self.as_element(), key.clone(), value)).as_element();
+							let element = insert(&key, ItemMapping::new(self.as_element(), key.clone(), value)).as_element();
 							self.add_child(element);
 							items.insert(key.clone(), element);
 						}

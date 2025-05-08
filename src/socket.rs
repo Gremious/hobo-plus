@@ -2,6 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 use wasm_bindgen_futures::js_sys;
 use serde::{Serialize, de::DeserializeOwned};
 use hobo::prelude::*;
+#[allow(unused_imports)] use super::{honk, slip};
 
 pub struct Socket<Out> {
 	ws: Rc<RefCell<web_sys::WebSocket>>,
